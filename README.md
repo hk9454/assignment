@@ -2,7 +2,7 @@
 
 M.Tech (AIML) · Machine Learning · Assignment 2
 
-- **GitHub repository:** `<GITHUB_REPO_URL>`
+- **GitHub repository:** https://github.com/hk9454/assignment
 - **Live Streamlit app:** `<STREAMLIT_APP_URL>`
 
 ---
@@ -52,7 +52,7 @@ through an interactive Streamlit app that evaluates them on uploaded test data w
 
 ## c. GitHub repository
 
-`<GITHUB_REPO_URL>`
+https://github.com/hk9454/assignment
 
 ```
 ├── app.py                  # Streamlit app
