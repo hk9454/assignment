@@ -75,7 +75,7 @@ def main() -> None:
 
     table = pd.DataFrame(rows).round(4)
     table.to_csv(MODEL_DIR / "metrics.csv", index=False)
-    print("\n" + table.to_markdown(index=False))
+    print("\n" + table.to_string(index=False))
 
 
 if __name__ == "__main__":
