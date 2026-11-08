@@ -1,6 +1,7 @@
 """Build the submission PDF: repo link, app link, BITS Lab screenshot, README content.
 
-usage (needs reportlab): python tools/make_submission_pdf.py README OUT [--repo URL] [--app URL] [--screenshot PNG]
+usage (needs reportlab): python tools/make_submission_pdf.py README OUT [--repo URL] [--app URL]
+       [--screenshot PNG] [--screenshot-caption TEXT] [--extra PNG::CAPTION ...] [--bits-id ID]
 """
 import argparse
 import re
@@ -18,6 +19,9 @@ ap = argparse.ArgumentParser()
 ap.add_argument("readme"); ap.add_argument("out")
 ap.add_argument("--repo", default=""); ap.add_argument("--app", default="")
 ap.add_argument("--screenshot", default="")
+ap.add_argument("--screenshot-caption", default="")
+ap.add_argument("--extra", nargs="*", default=[], help="more screenshots as PATH::CAPTION")
+ap.add_argument("--bits-id", default="")
 a = ap.parse_args()
 
 ss = getSampleStyleSheet()
@@ -135,7 +139,7 @@ story = [
     Paragraph("M.Tech (AIML) · Work Integrated Learning Programmes, BITS Pilani", sub),
     Paragraph("Credit Card Default Prediction with Five Classifiers and a Streamlit App", sub),
     Spacer(1, 0.4 * cm),
-    Paragraph("Name: Himanshu Sharma &nbsp;&nbsp;|&nbsp;&nbsp; BITS ID: ____________________", sub),
+    Paragraph("Name: Himanshu Sharma &nbsp;&nbsp;|&nbsp;&nbsp; BITS ID: " + (a.bits_id or "____________________"), sub),
     Spacer(1, 1 * cm),
     Paragraph("1. GitHub Repository Link", h2),
     Paragraph(link(a.repo, "&lt;GitHub repository link to be added&gt;"), body),
@@ -145,11 +149,18 @@ story = [
     Paragraph(link(a.app, "&lt;Streamlit Community Cloud link to be added&gt;"), body),
     Paragraph("3. Screenshot — Execution on BITS Virtual Lab", h2),
 ]
-if a.screenshot and Path(a.screenshot).exists():
-    img = Image(a.screenshot)
-    scale = min(W / img.imageWidth, 13 * cm / img.imageHeight)
+cap = ParagraphStyle("cap", parent=body, fontSize=8.5, textColor=colors.HexColor("#444444"), alignment=TA_CENTER)
+
+
+def shot(path, caption, max_h):
+    img = Image(path)
+    scale = min(W / img.imageWidth, max_h / img.imageHeight)
     img.drawWidth, img.drawHeight = img.imageWidth * scale, img.imageHeight * scale
-    story.append(img)
+    return KeepTogether([img, Spacer(1, 3), Paragraph(caption, cap), Spacer(1, 10)])
+
+
+if a.screenshot and Path(a.screenshot).exists():
+    story.append(shot(a.screenshot, a.screenshot_caption, 11 * cm))
 else:
     box = Table([[Paragraph("BITS Virtual Lab screenshot to be inserted here", missing)]],
                 colWidths=[W], rowHeights=[6 * cm])
@@ -157,6 +168,14 @@ else:
                              ("ALIGN", (0, 0), (-1, -1), "CENTER"), ("VALIGN", (0, 0), (-1, -1), "MIDDLE")]))
     story.append(box)
 
+if a.extra:
+    story += [PageBreak(), Paragraph("3 (contd.). Additional screenshots — BITS Virtual Lab execution", h2),
+              Paragraph("All screenshots below were taken on the BITS Virtual Lab session of user s2026ak05703. "
+                        "The remote-desktop session token in the browser address bar has been masked.", body),
+              Spacer(1, 6)]
+    for n, item in enumerate(a.extra, start=2):
+        path, _, caption = item.partition("::")
+        story.append(shot(path, f"Figure {n}. {caption}", 10.5 * cm))
 story += [PageBreak(), Paragraph("4. GitHub README Content", h2), Spacer(1, 4)]
 story += readme_flowables(Path(a.readme).read_text(), W)
 doc.build(story, onFirstPage=footer, onLaterPages=footer)
