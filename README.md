@@ -3,7 +3,7 @@
 M.Tech (AIML) · Machine Learning · Assignment 2
 
 - **GitHub repository:** https://github.com/hk9454/assignment
-- **Live Streamlit app:** `<STREAMLIT_APP_URL>`
+- **Live Streamlit app:** https://assignment-22jabdambijh7uumb6hvsw.streamlit.app/
 
 ---
 
